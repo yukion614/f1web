@@ -17,40 +17,43 @@ datasource db {
 // 建立表單
 
 model User {
-  id Int @id @default(autoincrement())
-  name String
-  email String @unique
-  avator String?
-  password String
-  role Int @default(0) // 0: user, 1: admin
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  avator    String?
+  password  String
+  role      Int      @default(0) // 0: user, 1: admin
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  posts Post[]
+  posts    Post[]
   messages Message[]
+
   @@map("users") // 將資料表名稱改為 users
 }
 
-model Post  {
-  id Int @id @default(autoincrement())
-  title String
+model Post {
+  id      Int    @id @default(autoincrement())
+  title   String
   content String
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   authorId Int
-  author User @relation(fields: [authorId], references: [id])
+  author   User @relation(fields: [authorId], references: [id])
+
   @@map("posts") // 將資料表名稱改為 posts
 }
 
-
-model Message{
-  id Int @id @default(autoincrement())
-  content String
+model Message {
+  id        Int      @id @default(autoincrement())
+  content   String
+  status    Int      @default(1) @db.TinyInt
   createdAt DateTime @default(now())
 
   authorId Int
-  author User @relation(fields: [authorId], references: [id]) 
+  author   User @relation(fields: [authorId], references: [id])
+
   @@map("messages") // 將資料表名稱改為 messages
 }
