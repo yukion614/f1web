@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <form id="myForm">
+      <input name="name" value="yukon" />
+      <input name="email" value="yukion614@gmail.com" />
+      <input name="password" value="123456" />
+      <button type="submit">Send</button>
+    </form>
+
+    <script>
+      document.getElementById("myForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const data = {
+          name: e.target.name.value,
+          email: e.target.email.value,
+          password: e.target.password.value,
+        };
+        fetch("http://127.0.0.1:3000/user/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        })
+          .then((res) => res.json())
+          .then(console.log)
+          .catch(console.error);
+      });
+    </script>
+  </body>
+</html>

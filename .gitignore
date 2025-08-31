@@ -13,3 +13,5 @@ yarn-error.log*
 
 # pnpm 專用鎖檔案可以選擇是否上傳
 # pnpm-lock.yaml
+
+/src/generated/prisma
