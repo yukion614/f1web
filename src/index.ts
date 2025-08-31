@@ -2,6 +2,7 @@ import express from "express";
 import type { Request, Response, NextFunction } from "express";
 import "dotenv/config";
 import usersRouter from "./routes/users.js";
+import messageRouter from "./routes/message.js";
 import cors from "cors";
 
 const app = express();
@@ -17,6 +18,7 @@ app.use((req, res, next) => {
 });
 
 app.use("/user", usersRouter);
+app.use("/message", messageRouter);
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello, World!");
 });

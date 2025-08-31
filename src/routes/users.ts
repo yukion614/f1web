@@ -4,11 +4,11 @@ import { prisma } from "../utils/prisma-only.js";
 import bcrypt from "bcryptjs";
 import { Prisma, PrismaClient } from "@prisma/client";
 
+import isP2002 from "../utils/isP2002.js";
+
 const router: Router = express.Router();
 
 router.post("/create", async (req: Request, res: Response) => {
-  console.log(req.body);
-
   const { name, email, password } = req.body;
   //hash
   const saltRound = 10;
@@ -32,24 +32,5 @@ router.post("/create", async (req: Request, res: Response) => {
     res.status(400).json(err);
   }
 });
-
-// 回傳真假
-function isP2002(err: unknown): err is { code: string } {
-  return (
-    typeof err === "object" &&
-    err != null &&
-    "code" in err &&
-    (err as any).code === "P2002"
-  );
-}
-
-// function isP2002(err: unknown): err is { code: string } {
-//   return (
-//     typeof err === "object" &&
-//     err !== null &&
-//     "code" in err &&
-//     (err as any).code === "P2002"
-//   );
-// }
 
 export default router;
