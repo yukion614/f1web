@@ -1,7 +1,6 @@
 import express from "express";
 import type { Request, Response, NextFunction, Router } from "express";
 import { prisma } from "../utils/prisma-only.js";
-import bcrypt from "bcryptjs";
 import { Prisma, PrismaClient } from "@prisma/client";
 
 const router: Router = express.Router();
