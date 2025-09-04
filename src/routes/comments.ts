@@ -1,6 +1,9 @@
 import express from "express";
 import type { Request, Response, NextFunction, Router } from "express";
 import { prisma } from "../utils/prisma-only.js";
+import { jwtParseMiddleware, requireAuth } from "../middleware/jwt.js";
+import isP2003 from "../utils/isP2003.js";
+import isP2025 from "../utils/isP2025.js";
 
 const router: Router = express.Router();
 //post->comment

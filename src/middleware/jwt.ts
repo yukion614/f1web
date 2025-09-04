@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import * as jwt from "jsonwebtoken";
 import type { JwtPayload } from "../interfaces/index.js";
-
+import { tokenBlackList } from "../utils/tokenBlackList.js";
 // JWT 設定
 const JWT_SECRET: string =
   process.env.JWT_SECRET || "your-secret-key-change-in-production";
@@ -30,6 +30,12 @@ export const jwtParseMiddleware = (
   // 檢查是否有提供 Authorization header
   if (authorization && authorization.startsWith("Bearer ")) {
     const token = authorization.substring(7); // 移除 "Bearer " 前綴
+
+    if (tokenBlackList.includes(token)) {
+      res.locals.user = null;
+      res.locals.isAuthenticated = false;
+      return next();
+    }
 
     try {
       // 解析 JWT token

@@ -2,12 +2,13 @@ import express from "express";
 import type { Request, Response, NextFunction, Router } from "express";
 import { prisma } from "../utils/prisma-only.js";
 import bcrypt from "bcryptjs";
-import { Prisma, PrismaClient } from "@prisma/client";
+// import { Prisma, PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import isP2002 from "../utils/isP2002.js";
 import "dotenv/config.js";
 import type { JwtPayload, loginSuccessResponse } from "../interfaces/index.js";
 import { z } from "zod";
+import { tokenBlackList } from "../utils/tokenBlackList.js";
 const router: Router = express.Router();
 
 router.post("/register", async (req: Request, res: Response) => {
@@ -106,6 +107,16 @@ router.post("/login", async (req: Request, res: Response) => {
       error: "伺服器錯誤",
     });
   }
+});
+
+//logout
+// const tokenBlackList: string[] = [];
+router.delete("/logout", async (req: Request, res: Response) => {
+  // 黑名單
+  const token = req.headers.authorization?.substring(7);
+  if (token) tokenBlackList.push(token);
+
+  res.status(200).json({ success: true, message: "已登出" });
 });
 
 export default router;
