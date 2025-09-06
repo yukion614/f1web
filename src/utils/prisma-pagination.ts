@@ -8,16 +8,16 @@ export const prisma = new PrismaClient().$extends(
       limit: 25, //每頁筆數
       includePageCount: true,
     },
-    // cursor: {
-    //   limit: 10,
-    //   getCursor(record: any) {
-    //     return record.id.toString(); //唯一
-    //   },
-    //   parseCursor(cursor: string) {
-    //     return {
-    //       id: parseInt(cursor),
-    //     };
-    //   },
-    // },
+    cursor: {
+      limit: 10,
+      getCursor(record: any) {
+        return record.id.toString(); //唯一
+      },
+      parseCursor(cursor: string) {
+        return {
+          id: parseInt(cursor),
+        };
+      },
+    },
   })
 );

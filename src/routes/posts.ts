@@ -1,7 +1,7 @@
 import express from "express";
 import type { Request, Response, NextFunction, Router } from "express";
-import { prisma } from "../utils/prisma-only.js";
-
+// import { prisma } from "../utils/prisma-only.js";
+import { prisma } from "../utils/prisma-pagination.js";
 // import { Prisma, PrismaClient } from "@prisma/client";
 // import { success } from "zod";
 import { jwtParseMiddleware, requireAuth } from "../middleware/jwt.js";
@@ -14,11 +14,12 @@ router.use(jwtParseMiddleware);
 // router.use(requireAuth);
 //發文(個人)
 router.post(
-  "/:authorId/posts",
+  "/create",
+   jwtParseMiddleware,
   requireAuth,
   async (req: Request, res: Response) => {
-    const authorId = req.params.authorId;
-    const { title, content } = req.body;
+    // const authorId = req.params.authorId;
+    const { title, content ,authorId } = req.body;
 
     // if (!res.locals.isAuthenticated) {
     //   return res.status(400).json({ success: false, message: "未登入帳戶" });
@@ -110,6 +111,28 @@ router.delete(
   }
 );
 
+//讀取所有的post 但有頁數
+//?page=2&limit=10
+router.get("/pagination", async (req: Request, res: Response) => {
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 20;
+
+  try {
+    const [contacts, meta] = await prisma.post
+      .paginate({
+        where: { status: 1 },
+        orderBy: [{ createdAt: "desc" }],
+      })
+      .withPages({
+        page,
+        limit,
+      });
+    res.status(200).json({ contacts, meta });
+  } catch (err) {
+    res.status(500).json({ message: "錯誤" });
+  }
+});
+
 //讀取post 包含下面的comment
 router.get("/:postId", async (req: Request, res: Response) => {
   const postId = parseInt(req.params.postId || "");
@@ -142,8 +165,4 @@ router.get("/:postId", async (req: Request, res: Response) => {
   }
 });
 
-//讀取所有的post 但有頁數
-router.get("/:pageNum", async (req: Request, res: Response) => {
-  const pageNum = parseInt(req.params.pageNum || "0");
-});
 export default router;
