@@ -18,3 +18,7 @@ yarn-error.log*
 
 #sesstion 存放
 sessions
+
+
+#uploads
+/src/uploads

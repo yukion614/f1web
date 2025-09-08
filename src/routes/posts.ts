@@ -155,6 +155,14 @@ router.get("/:postId", async (req: Request, res: Response) => {
             content: true,
             updatedAt: true,
             authorId: true,
+            author:{
+              select:{
+                // id:true,
+                name:true,
+                avatar:true
+              }
+            }
+           
           },
         },
       },

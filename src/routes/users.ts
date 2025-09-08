@@ -9,10 +9,12 @@ import "dotenv/config.js";
 import type { JwtPayload, loginSuccessResponse } from "../interfaces/index.js";
 import { z } from "zod";
 import { tokenBlackList } from "../utils/tokenBlackList.js";
+import "dotenv"
 const router: Router = express.Router();
 
 router.post("/register", async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
+
   //hash
   const saltRound = 10;
   const hash = await bcrypt.hashSync(password, saltRound);
@@ -32,10 +34,12 @@ router.post("/register", async (req: Request, res: Response) => {
         password: hash,
       },
     });
-    res.status(200).json(user);
+    // res.status(200).json(user);
+    res.status(200).json({
+      success:true,
+      message:"註冊成功！！"
+    });
   } catch (err: unknown) {
-    // console.log(err);
-
     if (isP2002(err)) {
       return res.status(400).json({ error: "這email 已經有人使用了" });
     }
@@ -69,7 +73,7 @@ router.post("/login", async (req: Request, res: Response) => {
       member_id: existingUser.id,
       email: email,
       name: existingUser.name,
-      avatar: existingUser.avatar as string,
+      avatar: existingUser.avatar?  `http://${process.env.HOST}:${process.env.PORT}${existingUser.avatar}` : null
     };
     const token = jwt.sign(payload, secret, {
       expiresIn: expires,
