@@ -7,11 +7,57 @@ import jwt from "jsonwebtoken";
 import isP2002 from "../utils/isP2002.js";
 import "dotenv/config.js";
 import type { JwtPayload, loginSuccessResponse } from "../interfaces/index.js";
-import { z } from "zod";
+import { success, z } from "zod";
 import { tokenBlackList } from "../utils/tokenBlackList.js";
 import "dotenv"
+import multer from "multer";
+import path from "path";
+import type { User } from "../generated/prisma/index.js";
 const router: Router = express.Router();
 
+// 設定路徑
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(process.cwd(), "src/uploads/avatars")); // 存到專案根目錄的 src/uploads
+  },
+  filename: (req, file, cb) => {
+    const uuid = crypto.randomUUID()
+    const fileName = `${uuid}${file.originalname}`
+    cb(null, fileName); // 保留原檔名
+  },
+});
+//圖片上傳倉庫
+const upload = multer({ storage });
+//token 金鑰 時間
+const secret = process.env.JWT_SECRET || "dfghjklfkdoermkoe";
+const expires = process.env.JWT_EXPIRES || "24h";
+//生token
+// const payload: JwtPayload = {
+//   member_id: existingUser.id,
+//   email: email,
+//   name: existingUser.name,
+//   avatar: existingUser.avatar?  `http://${process.env.HOST}:${process.env.PORT}${existingUser.avatar}` : null
+// };
+// const token = jwt.sign(payload, secret, {
+//   expiresIn: expires,
+// } as jwt.SignOptions);
+
+function generateToken(existingUser:User,secret:string,expires:string){
+  const payload: JwtPayload = {
+    member_id: existingUser.id,
+    email: existingUser.email,
+    name: existingUser.name,
+    avatar: existingUser.avatar?  `http://${process.env.HOST}:${process.env.PORT}${existingUser.avatar}` : null
+  };
+  const token = jwt.sign(payload, secret, {
+    expiresIn: expires,
+  } as jwt.SignOptions);
+  return token
+}
+
+
+
+//註冊
 router.post("/register", async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
 
@@ -67,17 +113,16 @@ router.post("/login", async (req: Request, res: Response) => {
     const isMatch = await bcrypt.compare(password, existingUser.password);
     if (!isMatch) return res.status(400).json({ message: "帳號密碼錯誤" });
     //生token
-    const secret = process.env.JWT_SECRET || "dfghjklfkdoermkoe";
-    const expires = process.env.JWT_EXPIRES || "24h";
-    const payload: JwtPayload = {
-      member_id: existingUser.id,
-      email: email,
-      name: existingUser.name,
-      avatar: existingUser.avatar?  `http://${process.env.HOST}:${process.env.PORT}${existingUser.avatar}` : null
-    };
-    const token = jwt.sign(payload, secret, {
-      expiresIn: expires,
-    } as jwt.SignOptions);
+    // const payload: JwtPayload = {
+    //   member_id: existingUser.id,
+    //   email: email,
+    //   name: existingUser.name,
+    //   avatar: existingUser.avatar?  `http://${process.env.HOST}:${process.env.PORT}${existingUser.avatar}` : null
+    // };
+    // const token = jwt.sign(payload, secret, {
+    //   expiresIn: expires,
+    // } as jwt.SignOptions);
+    const token = generateToken(existingUser,secret,expires)
     //建立回應資訊
     const response: loginSuccessResponse = {
       success: true,
@@ -124,4 +169,36 @@ router.delete("/logout", async (req: Request, res: Response) => {
   res.status(200).json({ success: true, message: "已登出" });
 });
 
+
+//上傳avatar
+router.patch("/:id/avatar", upload.single("avatar"),async (req,res)=>{
+   const id = Number(req.params.id) 
+  //  console.log(req.file) 
+  const avatarImg =  req.file.filename
+  // console.log('avatarImg',avatarImg)
+  // const date = new Date()
+  const url =  `/uploads/avatars/${avatarImg}`
+  try{
+      const result = await prisma.user.update({
+      where:{
+        id:id
+      },
+      data:{
+        avatar: url
+      }
+    })
+   
+
+    const existingUser = await prisma.user.findFirst({
+      where: { id: id,},
+    });
+
+    const token = generateToken(existingUser,secret,expires)
+
+    res.json({success:true, message: "上傳成功", token: token });
+  }catch(err){
+    console.log(err)
+  }
+
+})
 export default router;
