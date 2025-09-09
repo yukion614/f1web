@@ -31,16 +31,6 @@ const upload = multer({ storage });
 //token 金鑰 時間
 const secret = process.env.JWT_SECRET || "dfghjklfkdoermkoe";
 const expires = process.env.JWT_EXPIRES || "24h";
-//生token
-// const payload: JwtPayload = {
-//   member_id: existingUser.id,
-//   email: email,
-//   name: existingUser.name,
-//   avatar: existingUser.avatar?  `http://${process.env.HOST}:${process.env.PORT}${existingUser.avatar}` : null
-// };
-// const token = jwt.sign(payload, secret, {
-//   expiresIn: expires,
-// } as jwt.SignOptions);
 
 function generateToken(existingUser:User,secret:string,expires:string){
   const payload: JwtPayload = {
@@ -112,16 +102,6 @@ router.post("/login", async (req: Request, res: Response) => {
     // password
     const isMatch = await bcrypt.compare(password, existingUser.password);
     if (!isMatch) return res.status(400).json({ message: "帳號密碼錯誤" });
-    //生token
-    // const payload: JwtPayload = {
-    //   member_id: existingUser.id,
-    //   email: email,
-    //   name: existingUser.name,
-    //   avatar: existingUser.avatar?  `http://${process.env.HOST}:${process.env.PORT}${existingUser.avatar}` : null
-    // };
-    // const token = jwt.sign(payload, secret, {
-    //   expiresIn: expires,
-    // } as jwt.SignOptions);
     const token = generateToken(existingUser,secret,expires)
     //建立回應資訊
     const response: loginSuccessResponse = {

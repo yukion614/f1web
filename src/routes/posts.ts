@@ -7,11 +7,43 @@ import { prisma } from "../utils/prisma-pagination.js";
 import { jwtParseMiddleware, requireAuth } from "../middleware/jwt.js";
 import isP2003 from "../utils/isP2003.js";
 import isP2025 from "../utils/isP2025.js";
+import multer from "multer"
+import path from "path";
 
 const router: Router = express.Router();
 
 router.use(jwtParseMiddleware);
 // router.use(requireAuth);
+
+//
+// 設定檔案儲存位置與檔名
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(process.cwd(), "src/uploads/post-img")); // 上傳資料夾
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const filename = Date.now() + ext;
+    cb(null, filename);
+  },
+});
+
+
+const upload = multer({ storage });
+//留言區圖片存擋
+router.post("/_img", upload.single("img"), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: "沒有上傳檔案" });
+  }
+  console.log('runnn')
+  res.json({
+    success: true,
+    filename: req.file.filename,
+    path: req.file.path,
+  });
+});
+
+
 //發文(個人)
 router.post(
   "/create",
@@ -20,10 +52,6 @@ router.post(
   async (req: Request, res: Response) => {
     // const authorId = req.params.authorId;
     const { title, content ,authorId } = req.body;
-
-    // if (!res.locals.isAuthenticated) {
-    //   return res.status(400).json({ success: false, message: "未登入帳戶" });
-    // }
     if (!authorId) {
       return res.status(400).json({ success: false, message: "id錯誤" });
     }

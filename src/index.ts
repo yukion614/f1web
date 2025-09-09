@@ -21,6 +21,9 @@ app.use(cors()); // 允許所有來源
 app.use("/api", router);
 //設定靜態路徑
 app.use("/uploads",express.static(path.join(__dirname, "uploads")))
+app.use("/uploads", express.static(path.join(process.cwd(), "src/uploads")));
+
+
 
 app.get("/", (req: Request, res: Response) => {
   // console.log((req.session as any).member);

@@ -22,3 +22,6 @@ sessions
 
 #uploads
 /src/uploads
+
+#img
+src/uploads/avatars
