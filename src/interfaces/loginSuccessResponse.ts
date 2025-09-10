@@ -11,5 +11,6 @@ export interface loginSuccessResponse extends ApiResponse {
   data: {
     member: Omit<User, "password">;
     token: string;
+    message:string;
   };
 }

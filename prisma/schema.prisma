@@ -29,6 +29,7 @@ model User {
   posts    Post[]
   messages Message[]
   Comment  Comment[]
+  likes    UserLikePost[]
 
   @@map("users") // 將資料表名稱改為 users
 }
@@ -40,15 +41,28 @@ model Post {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  status Int @default(1)
+  likeCount Int      @default(0)
+  status    Int      @default(1)
 
   authorId Int
   author   User @relation(fields: [authorId], references: [id])
 
   comments Comment[] // 一篇 Post 有多個 Comment
 
+  likes UserLikePost[]
+
   @@map("posts")
+}
+
+model UserLikePost {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    Int
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId]) // 同一篇文章同一個使用者只能按一次
 }
 
 model Comment {

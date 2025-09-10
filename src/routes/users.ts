@@ -117,6 +117,7 @@ router.post("/login", async (req: Request, res: Response) => {
           updatedAt: existingUser.updatedAt,
         },
         token: token,
+        message:"登入成功！！"
       },
     };
     res.status(200).json(response);
@@ -181,4 +182,6 @@ router.patch("/:id/avatar", upload.single("avatar"),async (req,res)=>{
   }
 
 })
+
+
 export default router;

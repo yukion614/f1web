@@ -9,6 +9,7 @@ import isP2003 from "../utils/isP2003.js";
 import isP2025 from "../utils/isP2025.js";
 import multer from "multer"
 import path from "path";
+import { success } from "zod";
 
 const router: Router = express.Router();
 
@@ -63,22 +64,24 @@ router.post(
           authorId: parseInt(authorId),
         },
       });
-      res.status(201).json(result);
+      return res.status(201).json({ success: true, message: "發文成功" });
     } catch (err) {
       if (isP2003(err))
         return res
           .status(400)
           .json({ success: false, message: "authorId不存在" });
-      return res.status(500).json(err);
+      return res.status(500).json({success:false,message:err});
     }
   }
 );
 //修改 個人
 router.put(
   "/posts/:postId",
+  jwtParseMiddleware,
   requireAuth,
   async (req: Request, res: Response) => {
     const postId = parseInt(req.params.postId || "");
+    console.log(req.user)
     const { title, content, authorId } = req.body;
     if (!postId) return res.status(400).json({ message: "沒有post_id" });
     try {
@@ -92,7 +95,7 @@ router.put(
           authorId: parseInt(authorId),
         },
       });
-      res.status(200).json(result);
+      res.status(200).json({success:true,message:"資料更新成功！！"});
     } catch (err) {
       if (isP2025(err))
         return res
@@ -139,6 +142,7 @@ router.delete(
   }
 );
 
+
 //讀取所有的post 但有頁數
 //?page=2&limit=10
 router.get("/pagination", async (req: Request, res: Response) => {
@@ -150,6 +154,16 @@ router.get("/pagination", async (req: Request, res: Response) => {
       .paginate({
         where: { status: 1 },
         orderBy: [{ createdAt: "desc" }],
+        include:{
+          author:{
+            select:{
+              avatar:true,
+              name:true,
+              id:true
+            }
+          },
+          comments:true
+        }
       })
       .withPages({
         page,
@@ -175,6 +189,11 @@ router.get("/:postId", async (req: Request, res: Response) => {
         createdAt: true,
         updatedAt: true,
         authorId: true,
+        author:{
+          select:{
+            avatar:true
+          }
+        },
 
         comments: {
           orderBy: { createdAt: "desc" },
@@ -200,5 +219,47 @@ router.get("/:postId", async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: err });
   }
 });
+
+//like post
+router.post("/:postId/:userId",async (req,res)=>{
+  const { postId , userId } = req.params
+  // type Keys = keyof typeof prisma.userLikePost;
+  //UserLikePost
+  try{
+    //查看有無按過喜歡
+    const exsitLike = await prisma.userLikePost.findUnique({
+      where:{
+        userId_postId:{
+          userId:Number(userId) ,
+          postId:Number(postId)
+        }
+      }
+    })
+    if(exsitLike){
+      return res.json({success:false,message:"已經按過了"})
+    }else{
+        //加進對比表
+        await prisma.userLikePost.create({
+          data:{
+            userId:Number(userId) ,
+            postId:Number(postId)
+          }
+        })
+        //likeCount++
+        await prisma.post.update({
+          where:{
+            id:Number(postId)
+          },
+          data:{
+            likeCount:{increment:1}
+          }
+        })
+      return res.json({success:true,message:"送出喜歡"})
+    }
+  }catch(err){
+    console.log(err)
+    res.status(500).json({success:false, message: "伺服器錯誤" });
+  }
+})
 
 export default router;
