@@ -34,7 +34,7 @@ const expires = process.env.JWT_EXPIRES || "24h";
 
 function generateToken(existingUser:User,secret:string,expires:string){
   const payload: JwtPayload = {
-    member_id: existingUser.id,
+    member_id: existingUser.id.toString(),
     email: existingUser.email,
     name: existingUser.name,
     avatar: existingUser.avatar?  `http://${process.env.HOST}:${process.env.PORT}${existingUser.avatar}` : null
@@ -108,7 +108,7 @@ router.post("/login", async (req: Request, res: Response) => {
       success: true,
       data: {
         member: {
-          id: existingUser.id,
+          id: existingUser.id.toString(),
           name: existingUser.name,
           email: existingUser.email,
           avatar: existingUser.avatar,
@@ -153,7 +153,7 @@ router.delete("/logout", async (req: Request, res: Response) => {
 
 //上傳avatar
 router.patch("/:id/avatar", upload.single("avatar"),async (req,res)=>{
-   const id = Number(req.params.id) 
+   const id = BigInt(req.params.id) 
   //  console.log(req.file) 
   const avatarImg =  req.file.filename
   // console.log('avatarImg',avatarImg)

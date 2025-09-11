@@ -9,7 +9,11 @@ import cors from "cors";
 // import { realpathSync } from "fs";
 import path from "path"
 
-// import { sessionMenberMiddleware } from "./middleware/sessoinMenber.js";
+// 讓 BigInt 在 JSON.stringify 時自動轉字串
+(BigInt.prototype as any).toJSON = function () {
+  return this.toString()
+}
+
 
 const app = express();
 

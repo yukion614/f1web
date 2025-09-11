@@ -31,6 +31,20 @@ const storage = multer.diskStorage({
 
 
 const upload = multer({ storage });
+
+router.get("/test",async (req,res)=>{
+  const result = await prisma.post.findMany({
+    where:{
+      status:1
+    }
+  })
+
+
+  res.json(result)
+  
+}) 
+
+
 //留言區圖片存擋
 router.post("/_img", upload.single("img"), (req, res) => {
   if (!req.file) {
@@ -51,8 +65,9 @@ router.post(
    jwtParseMiddleware,
   requireAuth,
   async (req: Request, res: Response) => {
-    // const authorId = req.params.authorId;
+ 
     const { title, content ,authorId } = req.body;
+    console.log({ title, content ,authorId } )
     if (!authorId) {
       return res.status(400).json({ success: false, message: "id錯誤" });
     }
@@ -61,7 +76,7 @@ router.post(
         data: {
           title: title,
           content: content,
-          authorId: parseInt(authorId),
+          authorId: BigInt(authorId),
         },
       });
       return res.status(201).json({ success: true, message: "發文成功" });
@@ -171,7 +186,7 @@ router.get("/pagination", async (req: Request, res: Response) => {
       });
     res.status(200).json({ contacts, meta });
   } catch (err) {
-    res.status(500).json({ message: "錯誤" });
+    res.status(500).json({ message: err });
   }
 });
 
@@ -223,14 +238,13 @@ router.get("/:postId", async (req: Request, res: Response) => {
 //like post
 router.post("/:postId/:userId",async (req,res)=>{
   const { postId , userId } = req.params
-  // type Keys = keyof typeof prisma.userLikePost;
   //UserLikePost
   try{
     //查看有無按過喜歡
     const exsitLike = await prisma.userLikePost.findUnique({
       where:{
         userId_postId:{
-          userId:Number(userId) ,
+          userId:BigInt(userId) ,
           postId:Number(postId)
         }
       }
@@ -241,14 +255,14 @@ router.post("/:postId/:userId",async (req,res)=>{
         //加進對比表
         await prisma.userLikePost.create({
           data:{
-            userId:Number(userId) ,
+            userId:BigInt(userId) ,
             postId:Number(postId)
           }
         })
         //likeCount++
         await prisma.post.update({
           where:{
-            id:Number(postId)
+            id: Number(postId)
           },
           data:{
             likeCount:{increment:1}
@@ -261,5 +275,7 @@ router.post("/:postId/:userId",async (req,res)=>{
     res.status(500).json({success:false, message: "伺服器錯誤" });
   }
 })
+
+
 
 export default router;

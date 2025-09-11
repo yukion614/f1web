@@ -8,20 +8,19 @@ import isP2025 from "../utils/isP2025.js";
 const router: Router = express.Router();
 //post->comment
 //新增底下留言
-router.post("/posts/:postId/comments", 
-  jwtParseMiddleware,
-  requireAuth,
-   async (req: Request, res: Response) => {
+router.post("/posts/:postId/comments", jwtParseMiddleware,requireAuth,async (req: Request, res: Response) => {
+
   const { postId } = req.params;
   const { content, authorId } = req.body;
   if (!postId || !authorId)
     return res.status(400).json({ message: "缺少 postId 或 authorId" });
   try {
+    console.log( typeof(content), typeof(authorId)  )
     const result = await prisma.comment.create({
       data: {
         content: content,
         postId: parseInt(postId),
-        authorId: parseInt(authorId),
+        authorId: authorId,
       },
     });
     res.status(201).json(result);
