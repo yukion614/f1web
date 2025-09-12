@@ -167,7 +167,9 @@ router.get("/pagination", async (req: Request, res: Response) => {
               id:true
             }
           },
-          comments:true
+          comments:{
+            where:{status:1}
+          }
         }
       })
       .withPages({
