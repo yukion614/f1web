@@ -17,20 +17,20 @@ datasource db {
 // 建立表單
 
 model User {
-  id        BigInt         @id @default(autoincrement())
-  name      String
-  email     String         @unique
-  avatar    String?
-  password  String
-  role      Int            @default(0) // 0: user, 1: admin
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
-  provider  String         @default("local")
-  // providerId String? // 第三方登入的使用者 ID
-  posts     Post[]
-  messages  Message[]
-  comment   Comment[]
-  likes     UserLikePost[]
+  id         BigInt         @id @default(autoincrement())
+  name       String
+  email      String         @unique
+  avatar     String?
+  password   String
+  role       Int            @default(0) // 0: user, 1: admin
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  provider   String         @default("local")
+  providerId String? // 第三方登入的使用者 ID
+  posts      Post[]
+  messages   Message[]
+  comment    Comment[]
+  likes      UserLikePost[]
 
   @@map("users") // 將資料表名稱改為 users
 }

@@ -10,7 +10,8 @@ export function generateToken(existingUser:User,secret:string,expires:string){
     member_id: existingUser.id,
     email: existingUser.email,
     name: existingUser.name,
-    avatar: avatar
+    avatar: avatar,
+    provider:existingUser.provider
 
   };
   const token = jwt.sign(payload, secret, {

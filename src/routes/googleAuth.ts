@@ -3,6 +3,7 @@ import type { JwtPayload, loginSuccessResponse } from "../interfaces/index.js";
 import type { User } from "../generated/prisma/index.js";
 import "dotenv"
 import {generateToken} from "../utils/generateToken.js"
+import { prisma } from "../utils/prisma-only.js";
 const router = express();
 
 const CLIENT_ID = process.env.CLIENT_ID
@@ -44,9 +45,47 @@ router.get("/callback", async (req, res) => {
 
         const tokenData = await tokenRes.json()
         const userData =  await getGoogleUserInfo(tokenData.access_token)
-        userData.provider = "google"
+        
         console.log(userData)
-        const token = generateToken(userData,secret,expires)
+        let user = {}
+        if(userData.verified_email){
+            const exsitUser = await prisma.user.findFirst({
+                where:{
+                    email:{
+                        contains:userData.email
+                    },
+                    providerId:{
+                        contains:userData.id
+                    },
+                    provider:{
+                        not:{
+                            contains:"local"
+                        }
+                    }
+                }
+            })
+         
+            if(!exsitUser){
+            
+                const result = await prisma.user.create({
+                    data:{
+                        name:userData.name,
+                        email:userData.email,
+                        avatar:userData.picture,
+                        password:"oauth_user_placeholder",
+                        provider:'google',
+                        providerId:userData.id
+                    }
+                })
+                console.log("未在資料庫中 新增使用者")
+                user = result
+            }else{
+                console.log("已經在資料庫中了 這個使用者")
+                user = exsitUser
+            }
+        }
+
+        const token = generateToken(user,secret,expires)
         // res.json(token)
         res.redirect(`${process.env.FRONTEND_URL}/?token=${token}`)
        

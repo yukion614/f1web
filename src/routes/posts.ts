@@ -9,7 +9,7 @@ import isP2003 from "../utils/isP2003.js";
 import isP2025 from "../utils/isP2025.js";
 import multer from "multer"
 import path from "path";
-import { success } from "zod";
+import { includes, success } from "zod";
 
 const router: Router = express.Router();
 
@@ -32,17 +32,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-router.get("/test",async (req,res)=>{
-  const result = await prisma.post.findMany({
-    where:{
-      status:1
-    }
-  })
 
-
-  res.json(result)
-  
-}) 
 
 
 //留言區圖片存擋
@@ -211,6 +201,7 @@ router.get("/:postId", async (req: Request, res: Response) => {
         },
 
         comments: {
+          where:{status:1},
           orderBy: { createdAt: "desc" },
           select: {
             id: true,
@@ -224,7 +215,6 @@ router.get("/:postId", async (req: Request, res: Response) => {
                 avatar:true
               }
             }
-           
           },
         },
       },

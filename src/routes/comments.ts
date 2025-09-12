@@ -4,6 +4,7 @@ import { prisma } from "../utils/prisma-only.js";
 import { jwtParseMiddleware, requireAuth } from "../middleware/jwt.js";
 import isP2003 from "../utils/isP2003.js";
 import isP2025 from "../utils/isP2025.js";
+import { success } from "zod";
 
 const router: Router = express.Router();
 //post->comment
@@ -68,15 +69,19 @@ router.put(
 //刪除留言
 router.delete("/delete/:commentId", async (req: Request, res: Response) => {
   const { commentId } = req.params;
+  console.log('in')
   if (!commentId) return res.status(400).json({ message: "id 錯誤" });
 
   try {
     const comment = await prisma.comment.findFirst({
       where: {
         id: parseInt(commentId),
-      },
+        status:{
+          not: 0,
+        },
+      }
     });
-    if (!comment) return res.status(404).json({ message: "沒有該留言" });
+    if (!comment) return res.status(404).json({success:false ,message: "沒有該留言" });
 
     await prisma.comment.update({
       where: {
@@ -86,8 +91,9 @@ router.delete("/delete/:commentId", async (req: Request, res: Response) => {
         status: 0,
       },
     });
+    res.json({success:true,message:"刪除成功"})
   } catch (err) {
-    res.status(500).json(err);
+    res.status(500).json({success:true,message:err});
   }
 });
 

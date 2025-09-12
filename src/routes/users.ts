@@ -13,6 +13,7 @@ import "dotenv"
 import multer from "multer";
 import path from "path";
 import type { User } from "../generated/prisma/index.js";
+import {generateToken} from "../utils/generateToken.js"
 const router: Router = express.Router();
 
 // 設定路徑
@@ -32,18 +33,19 @@ const upload = multer({ storage });
 const secret = process.env.JWT_SECRET || "dfghjklfkdoermkoe";
 const expires = process.env.JWT_EXPIRES || "24h";
 
-function generateToken(existingUser:User,secret:string,expires:string){
-  const payload: JwtPayload = {
-    member_id: existingUser.id.toString(),
-    email: existingUser.email,
-    name: existingUser.name,
-    avatar: existingUser.avatar?  `http://${process.env.HOST}:${process.env.PORT}${existingUser.avatar}` : null
-  };
-  const token = jwt.sign(payload, secret, {
-    expiresIn: expires,
-  } as jwt.SignOptions);
-  return token
-}
+
+// function generateToken(existingUser:User,secret:string,expires:string){
+//   const payload: JwtPayload = {
+//     member_id: existingUser.id.toString(),
+//     email: existingUser.email,
+//     name: existingUser.name,
+//     avatar: existingUser.avatar?  `http://${process.env.HOST}:${process.env.PORT}${existingUser.avatar}` : null
+//   };
+//   const token = jwt.sign(payload, secret, {
+//     expiresIn: expires,
+//   } as jwt.SignOptions);
+//   return token
+// }
 
 
 
@@ -154,10 +156,8 @@ router.delete("/logout", async (req: Request, res: Response) => {
 //上傳avatar
 router.patch("/:id/avatar", upload.single("avatar"),async (req,res)=>{
    const id = BigInt(req.params.id) 
-  //  console.log(req.file) 
   const avatarImg =  req.file.filename
-  // console.log('avatarImg',avatarImg)
-  // const date = new Date()
+  // const url =  `${process.env.BACKEND_URL}/uploads/avatars/${avatarImg}`
   const url =  `/uploads/avatars/${avatarImg}`
   try{
       const result = await prisma.user.update({
