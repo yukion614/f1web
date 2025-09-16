@@ -4,7 +4,8 @@ import jwt from "jsonwebtoken";
 export function generateToken(existingUser:User,secret:string,expires:string){
   console.log(existingUser)
   const rawPic = existingUser.avatar || existingUser.picture
-  const avatar = rawPic ?  rawPic.startsWith("http") ? rawPic : `http://${process.env.HOST}:${process.env.PORT}${rawPic}` : null
+  // const avatar = rawPic ?  rawPic.startsWith("http") ? rawPic : `http://${process.env.HOST}:${process.env.PORT}${rawPic}` : null
+  const avatar = rawPic ?  rawPic.startsWith("http") ? rawPic : `${process.env.BACKEND_URL}${rawPic}` : null
   
   const payload: JwtPayload = {
     member_id: existingUser.id,

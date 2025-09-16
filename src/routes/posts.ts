@@ -36,16 +36,19 @@ const upload = multer({ storage });
 
 
 //留言區圖片存擋
-router.post("/_img", upload.single("img"), (req, res) => {
+router.post("/_img", upload.single("file"), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: "沒有上傳檔案" });
   }
-  console.log('runnn')
+  console.log('run')
+  // res.json({
+  //   success: true,
+  //   filename: req.file.filename,
+  //   path: req.file.path,
+  // });
   res.json({
-    success: true,
-    filename: req.file.filename,
-    path: req.file.path,
-  });
+    url: `http://${process.env.HOST}:${process.env.PORT}/uploads/post-img/${req.file.filename}`
+  })
 });
 
 

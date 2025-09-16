@@ -60,6 +60,7 @@ router.put(
           content: content,
         },
       });
+      res.status(200).json({success:true,message:"更新留言"})
     } catch (err) {
       res.status(500).json(err);
     }

@@ -34,18 +34,6 @@ const secret = process.env.JWT_SECRET || "dfghjklfkdoermkoe";
 const expires = process.env.JWT_EXPIRES || "24h";
 
 
-// function generateToken(existingUser:User,secret:string,expires:string){
-//   const payload: JwtPayload = {
-//     member_id: existingUser.id.toString(),
-//     email: existingUser.email,
-//     name: existingUser.name,
-//     avatar: existingUser.avatar?  `http://${process.env.HOST}:${process.env.PORT}${existingUser.avatar}` : null
-//   };
-//   const token = jwt.sign(payload, secret, {
-//     expiresIn: expires,
-//   } as jwt.SignOptions);
-//   return token
-// }
 
 
 
@@ -100,7 +88,7 @@ router.post("/login", async (req: Request, res: Response) => {
     });
 
     if (!existingUser) return res.status(400).json({ message: "該用戶不存在" });
-
+    console.log('avatar===>>',existingUser)
     // password
     const isMatch = await bcrypt.compare(password, existingUser.password);
     if (!isMatch) return res.status(400).json({ message: "帳號密碼錯誤" });

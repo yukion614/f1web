@@ -22,13 +22,15 @@ router.get("/", (req, res) => {
     "&access_type=offline";
     // res.send(`<a href="${url}">使用 Google 登入</a>`);
     //   res.redirect(`<a href="${url}">使用 Google 登入</a>`);
+        console.log(url)
     res.send({ url })
+
 });
 
 // Google 回調
 router.get("/callback", async (req, res) => {
   const code = req.query.code;
-
+    console.log('run_callback')
     try{
         // 用 code(授權碼) 轉換成 token 向https://oauth2.googleapis.com/token 拿取
         const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
